@@ -42,7 +42,7 @@ public class LeaderBoard : MonoBehaviour
                 continue;
             }
             leaderboardEntries[x].transform.Find("PlayerName").GetComponent<TextMeshProUGUI>().text = (leaderboard[x].Position + 1) + "." + leaderboard[x].DisplayName;
-            leaderboardEntries[x].transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = (-(float)leaderboard[x].StatValue * .001f).ToString();
+            leaderboardEntries[x].transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = ((float)leaderboard[x].StatValue).ToString();
         }
     }
     public void SetLeaderboardEntry(int newScore)

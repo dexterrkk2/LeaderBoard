@@ -5,10 +5,12 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     public float speed;
-    private Rigidbody rig;
+    public Rigidbody rig;
     float startTime;
     float timeTaken;
-
+    public int startingLives;
+    int lives;
+    float score;
     int collectabledPicked;
     public int maxCollectables = 10;
     bool isPlaying;
@@ -16,16 +18,18 @@ public class PlayerController : MonoBehaviour
     public TextMeshProUGUI curTimeText;
     public GameObject[] collectables;
     public Transform startPosition;
+    int collectablesTotal;
+    int beginTimes;
     // Start is called before the first frame update
     void Awake()
     {
+        lives = startingLives;
         rig = GetComponent<Rigidbody>();
     }
-
     // Update is called once per frame
     void Update()
     {
-        if(!isPlaying){
+        if (!isPlaying) {
             return;
         }
 
@@ -34,36 +38,57 @@ public class PlayerController : MonoBehaviour
 
         rig.velocity = new Vector3(x, rig.velocity.y, z);
         curTimeText.text = (Time.time - startTime).ToString("F2");
+        if (lives <= 0)
+        {
+            End();
+        }
     }
     public void Begin()
     {
+        lives = startingLives;
         collectabledPicked = 0;
-        for(int i = 0; i< collectables.Length; i++)
+        for (int i = 0; i < collectables.Length; i++)
         {
             collectables[i].SetActive(true);
         }
-        startTime = Time.time;
+        if (beginTimes == 0)
+        {
+            startTime = Time.time;
+        }
         transform.position = startPosition.position;
         isPlaying = true;
         playButton.SetActive(false);
+        beginTimes++;
+    }
+    public void TakeDamage(){
+        lives -= 1;
     }
     void End()
     {
         timeTaken = Time.time - startTime;
+        score = (collectablesTotal * 100);
+        Debug.Log(score);
         isPlaying = false;
         playButton.SetActive(true);
-        LeaderBoard.instance.SetLeaderboardEntry(-Mathf.RoundToInt(timeTaken * 1000f));
+        LeaderBoard.instance.SetLeaderboardEntry(Mathf.RoundToInt(score));
+        beginTimes = 0;
+
     }
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("collectable"))
         {
             collectabledPicked++;
+            collectablesTotal++;
             other.gameObject.SetActive(false);
             if(collectabledPicked == maxCollectables)
             {
-                End();
+                Begin();
             }
         }
+    }
+    public void PlayButtonReset()
+    {
+        collectablesTotal = 0;
     }
 }
