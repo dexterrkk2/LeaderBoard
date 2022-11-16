@@ -81,4 +81,16 @@ public class Enemy: MonoBehaviour
             player.TakeDamage();
         }
     }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Wall"))
+        {
+
+        }
+        if (other.CompareTag("Player"))
+        {
+            PlayerController player = other.gameObject.GetComponent<PlayerController>();
+            player.TakeDamage();
+        }
+    }
 }
