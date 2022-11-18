@@ -8,6 +8,9 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rig;
     float startTime;
     float timeTaken;
+    float timeCheck;
+    public float invincibleDelay;
+    float lastDamageTime;
     public int startingLives;
     int lives;
     float score;
@@ -20,6 +23,11 @@ public class PlayerController : MonoBehaviour
     public Transform startPosition;
     int collectablesTotal;
     int beginTimes;
+    public bool playButtonPressed;
+    public TextMeshProUGUI LivesText;
+    public TextMeshProUGUI scoreText;
+    public MeshRenderer mesh;
+    public GameObject gfx;
     // Start is called before the first frame update
     void Awake()
     {
@@ -35,17 +43,17 @@ public class PlayerController : MonoBehaviour
 
         float x = Input.GetAxis("Horizontal") * speed;
         float z = Input.GetAxis("Vertical") * speed;
-
         rig.velocity = new Vector3(x, rig.velocity.y, z);
         curTimeText.text = (Time.time - startTime).ToString("F2");
         if (lives <= 0)
         {
             End();
         }
+        LivesText.text = "Lives:" + lives;
+        transform.rotation = Quaternion.LookRotation(rig.velocity);
     }
     public void Begin()
     {
-        lives = startingLives;
         collectabledPicked = 0;
         for (int i = 0; i < collectables.Length; i++)
         {
@@ -59,9 +67,28 @@ public class PlayerController : MonoBehaviour
         isPlaying = true;
         playButton.SetActive(false);
         beginTimes++;
+        lives += 2;
     }
     public void TakeDamage(){
-        lives -= 1;
+        timeCheck = Time.time - startTime;
+        if (timeCheck-lastDamageTime> invincibleDelay) {
+            lives -= 1;
+            lastDamageTime = Time.time - startTime;
+            Debug.Log(lives);
+            FlashDamage();
+        }
+    }
+    void FlashDamage()
+    {
+        StartCoroutine(DamageFlashCoRoutine());
+        IEnumerator DamageFlashCoRoutine()
+        {
+
+            Color defaultColor = mesh.material.color;
+            mesh.material.color = Color.black;
+            yield return new WaitForSeconds(invincibleDelay);
+            mesh.material.color = defaultColor;
+        }
     }
     void End()
     {
@@ -72,7 +99,6 @@ public class PlayerController : MonoBehaviour
         playButton.SetActive(true);
         LeaderBoard.instance.SetLeaderboardEntry(Mathf.RoundToInt(score));
         beginTimes = 0;
-
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -80,6 +106,7 @@ public class PlayerController : MonoBehaviour
         {
             collectabledPicked++;
             collectablesTotal++;
+            scoreText.text = "Score:" + collectablesTotal * 100;
             other.gameObject.SetActive(false);
             if(collectabledPicked == maxCollectables)
             {
@@ -90,5 +117,8 @@ public class PlayerController : MonoBehaviour
     public void PlayButtonReset()
     {
         collectablesTotal = 0;
+        lives = startingLives;
+        timeCheck = 0;
+        lastDamageTime = 0;
     }
 }

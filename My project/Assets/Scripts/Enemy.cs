@@ -15,6 +15,7 @@ public class Enemy: MonoBehaviour
     public Transform startPosition;
     public float delay;
     public int startSpeed;
+    public GameObject gfx;
     public void OnLoggedIn()
     {
         speed = startSpeed;
@@ -68,6 +69,7 @@ public class Enemy: MonoBehaviour
             targetDirection = targetPlayer.transform.position + targetPlayer.rig.velocity - transform.position;
         }
         rig.velocity = targetDirection.normalized * speed;
+        transform.rotation = Quaternion.LookRotation(rig.velocity);
     }
     private void OnTriggerEnter(Collider other)
     {
